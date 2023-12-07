@@ -1,0 +1,138 @@
+data = {'birds': ['Cranes', 'Cranes', 'plovers', 'spoonbills', 'spoonbills', 'Cranes', 'plovers', 'Cranes', 'spoonbills', 'spoonbills', 'Cranes'], 
+        'age': [3.5, 4, 1.5, np.nan, 6, 3, 5.5, np.nan, 8, 4, 3.5], 'visits': [2, 4, 3, 4, 3, 4, 2, 2, 3, 2, 2], 
+        'priority': ['yes', 'yes', 'no', np.nan, 'no', 'no', 'no', 'yes', 'no', 'no','yes']}
+
+labels = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k']
+import numpy as np
+import pandas as pd
+
+Q-1:
+i. Create a DataFrame birds from the above dictionary data which has the index labels.
+
+ii. Display basic information about the dataFrame.
+
+iii. Show Alternate rows of the dataframe.
+
+
+birds = pd.DataFrame(data, index = labels)
+
+birds.info()
+
+birds[::2]
+
+
+Q-2:
+i. Show only rows [1st, 3rd, 7th] from columns ['bird', 'age']
+
+ii. Select rows where the number of visits is less than 4.
+
+
+birds[['birds','age']].iloc[[0, 2, 6]]
+
+birds[birds['visits'] < 4]
+
+
+Q-3:
+i. Select all rows with nan values in age and visits column.
+
+ii. Fill nan with respective series mode value.
+
+
+birds[birds.age.isna() | birds.visits.isna()]
+
+birds.age.fillna(birds.age.mode()[0],inplace = True)
+birds.visits.fillna(birds.visits.mode()[0], inplace = True)
+
+
+Q-4
+i. Find the total number of visits of the bird Cranes
+
+ii. Find the number of each type of birds in dataframe.
+
+iii. Print no of duplicate rows
+
+iv. Drop Duplicates rows and make this changes permanent. Show dataframe after changes.
+
+
+birds[birds.birds == 'Cranes'].visits.sum()
+
+birds['birds'].value_counts()
+
+birds.duplicated().sum()
+
+birds.drop_duplicates(inplace = True)
+
+
+Q-5: In IPL matches dataset some teams name has changed.
+You will have to consider them as same.
+
+'Delhi Capitals' formerly as 'Delhi Daredevils' 
+'Punjab Kings' formerly as 'Kings XI Punjab'
+'Rising Pune Supergiant' formerly as 'Rising Pune Supergiants'
+You need to make changes accordingly. Consider current name for each teams.
+
+Be careful Gujrat Titans and Gujrat Lions are different teams.
+
+
+matches = pd.read_csv('IPL_Matches_2008_2022.csv')
+changed_name = {
+    'Delhi Daredevils':'Delhi Capitals',
+    'Kings XI Punjab':'Punjab Kings',
+    'Rising Pune Supergiants':'Rising Pune Supergiant'
+}
+
+matches.replace(changed_name.keys(), changed_name.values())
+matches.head()
+
+
+Q-6 Write a code which can display the bar chart of top 5 teams who have played maximum number of matches in the IPL.
+Hint: Be careful the data is divided in 2 different cols(Team 1 and Team 2)
+
+team1 = matches['Team1'].value_counts()
+team2 = matches['Team2'].value_counts()
+
+new_df = team1 + team2
+
+new_df.sort_values(ascending = False).head().plot(kind = 'bar')
+
+
+Q-7 Find who won most player of the match awards again Mumbai Indians.
+
+m1 = (matches.Team1 == 'Mumbai Indians') | (matches.Team2 == 'Mumbai Indians')
+m2 = (matches.WinningTeam != 'Mumbai Indians')
+
+matches[m1 & m2].Player_of_Match.value_counts().head(1)
+
+
+Q-8: Team1 vs Team2 Dashbord
+Create a function which will take two string(name of two teams) as input. Show win Loss record between them and player getting most player of the match award in matches between these two teams.
+
+team1_vs_team2('Kolkata Knight Riders','Chennai Super Kings')
+
+
+def team1_vs_team2(team1, team2):
+  """
+  this function takes 2 teams as input, compares both the teams and returns the result
+  """
+
+  team_1_won_matches = (matches.Team1 == team1) | (matches.Team2 == team1)
+
+  team_2_won_matches = (matches.Team1 == team2) | (matches.Team2 == team2)
+
+  df1 = matches[team_1_won_matches & team_2_won_matches]
+
+  print(df1.WinningTeam.value_counts())
+  print(df1.Player_of_Match.value_counts().head(1))
+
+
+team1_vs_team2('Kolkata Knight Riders','Chennai Super Kings')
+
+
+Q-9: Find out the top 7 cities where the matches of Kolkata Knight Riders are played frequently and plot the result as bar chart.
+
+matches[(matches['Team1'] == 'Kolkata Knight Riders') | (matches['Team2'] == 'Kolkata Knight Riders')]['City'].value_counts().head(7).plot(kind='bar')
+
+
+Q-10: Find out the average margin for the team Mumbai Indians for only the session 2011.
+
+matches[((matches.Team1 == 'Mumbai Indians') | (matches.Team2 == 'Mumbai Indians')) & (matches.Season == '2011')].Margin.mean()
